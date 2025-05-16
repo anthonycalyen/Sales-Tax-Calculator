@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Sales Tax Calculator</title>
+  <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
+  <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #f4f4f9;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    label, select, input, button {
+      display: block;
+      width: 100%;
+      margin-top: 10px;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px;
+      font-size: 16px;
+      background-color: #347fc4;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #2a6ca1;
+    }
+    #output {
+      margin-top: 25px;
+      padding: 15px;
+      background-color: #fff;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      white-space: pre-wrap;
+    }
+    .disclaimer {
+      margin-top: 20px;
+      font-size: 0.9em;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Sales Tax Calculator</h1>
+
+  <label for="state">Select State:</label>
+  <select id="state">
+    <option value="">-- Choose a State --</option>
+    <option value="Alabama">Alabama</option>
+    <option value="Alaska">Alaska</option>
+    <option value="Arizona">Arizona</option>
+    <option value="Arkansas">Arkansas</option>
+    <option value="California">California</option>
+    <option value="Colorado">Colorado</option>
+    <option value="Connecticut">Connecticut</option>
+    <option value="Delaware">Delaware</option>
+    <option value="Florida">Florida</option>
+    <option value="Georgia">Georgia</option>
+    <option value="Hawaii">Hawaii</option>
+    <option value="Idaho">Idaho</option>
+    <option value="Illinois">Illinois</option>
+    <option value="Indiana">Indiana</option>
+    <option value="Iowa">Iowa</option>
+    <option value="Kansas">Kansas</option>
+    <option value="Kentucky">Kentucky</option>
+    <option value="Louisiana">Louisiana</option>
+    <option value="Maine">Maine</option>
+    <option value="Maryland">Maryland</option>
+    <option value="Massachusetts">Massachusetts</option>
+    <option value="Michigan">Michigan</option>
+    <option value="Minnesota">Minnesota</option>
+    <option value="Mississippi">Mississippi</option>
+    <option value="Missouri">Missouri</option>
+    <option value="Montana">Montana</option>
+    <option value="Nebraska">Nebraska</option>
+    <option value="Nevada">Nevada</option>
+    <option value="New Hampshire">New Hampshire</option>
+    <option value="New Jersey">New Jersey</option>
+    <option value="New Mexico">New Mexico</option>
+    <option value="New York">New York</option>
+    <option value="North Carolina">North Carolina</option>
+    <option value="North Dakota">North Dakota</option>
+    <option value="Ohio">Ohio</option>
+    <option value="Oklahoma">Oklahoma</option>
+    <option value="Oregon">Oregon</option>
+    <option value="Pennsylvania">Pennsylvania</option>
+    <option value="Rhode Island">Rhode Island</option>
+    <option value="South Carolina">South Carolina</option>
+    <option value="South Dakota">South Dakota</option>
+    <option value="Tennessee">Tennessee</option>
+    <option value="Texas">Texas</option>
+    <option value="Utah">Utah</option>
+    <option value="Vermont">Vermont</option>
+    <option value="Virginia">Virginia</option>
+    <option value="Washington">Washington</option>
+    <option value="West Virginia">West Virginia</option>
+    <option value="Wisconsin">Wisconsin</option>
+    <option value="Wyoming">Wyoming</option>
+    <option value="District of Columbia">District of Columbia</option>
+  </select>
+
+  <label for="amount">Enter Purchase Amount ($):</label>
+  <input type="number" id="amount" placeholder="e.g., 49.99" />
+
+  <button id="calcBtn">Calculate Tax</button>
+
+  <div id="output"></div>
+
+  <div class="disclaimer">
+    Disclaimer: This estimate includes only the base state-level sales tax.<br>
+    Local taxes (city/county) are not included and may apply depending on your location.<br>
+    Please verify current rates and local tax rules with your state’s official tax authority.
+  </div>
+
+  <py-script>
+from pyscript import Element
+
+state_tax_rates = {
+    "Alabama": 0.04, "Alaska": 0.00, "Arizona": 0.056, "Arkansas": 0.065, "California": 0.0725,
+    "Colorado": 0.029, "Connecticut": 0.0635, "Delaware": 0.00, "Florida": 0.06, "Georgia": 0.04,
+    "Hawaii": 0.04, "Idaho": 0.06, "Illinois": 0.0625, "Indiana": 0.07, "Iowa": 0.06,
+    "Kansas": 0.065, "Kentucky": 0.06, "Louisiana": 0.05, "Maine": 0.055, "Maryland": 0.06,
+    "Massachusetts": 0.0625, "Michigan": 0.06, "Minnesota": 0.06875, "Mississippi": 0.07,
+    "Missouri": 0.04225, "Montana": 0.00, "Nebraska": 0.055, "Nevada": 0.0685,
+    "New Hampshire": 0.00, "New Jersey": 0.06625, "New Mexico": 0.04875, "New York": 0.04,
+    "North Carolina": 0.0475, "North Dakota": 0.05, "Ohio": 0.0575, "Oklahoma": 0.045,
+    "Oregon": 0.00, "Pennsylvania": 0.06, "Rhode Island": 0.07, "South Carolina": 0.06,
+    "South Dakota": 0.042, "Tennessee": 0.07, "Texas": 0.0625, "Utah": 0.061, "Vermont": 0.06,
+    "Virginia": 0.053, "Washington": 0.065, "West Virginia": 0.06, "Wisconsin": 0.05,
+    "Wyoming": 0.04, "District of Columbia": 0.06
+}
+
+def calculate():
+    state = Element("state").element.value
+    try:
+        amount = float(Element("amount").element.value)
+        if amount < 0:
+            Element("output").element.innerText = "Amount must be a positive number."
+            return
+    except:
+        Element("output").element.innerText = "Please enter a valid number for amount."
+        return
+
+    if state not in state_tax_rates:
+        Element("output").element.innerText = f"Sorry, tax rate for '{state}' is not available."
+        return
+
+    tax_rate = state_tax_rates[state]
+    tax = round(amount * tax_rate, 2)
+    total = round(amount + tax, 2)
+
+    Element("output").element.innerText = (
+        f"--- Receipt ---\n"
+        f"State: {state}\n"
+        f"Subtotal: ${amount:.2f}\n"
+        f"Sales Tax (@ {tax_rate*100:.3f}%): ${tax:.2f}\n"
+        f"Total: ${total:.2f}"
+    )
+  </py-script>
+
+  <script>
+    document.addEventListener("py:ready", () => {
+      document.getElementById("calcBtn").addEventListener("click", () => {
+        pyscript.interpreter.globals.get('calculate')();
+      });
+    });
+  </script>
+
+</body>
+</html>
